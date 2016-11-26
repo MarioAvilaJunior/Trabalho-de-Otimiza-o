@@ -64,7 +64,7 @@ int main(int argc, char **argv)
             //printf("\nFim do arquivo.\n\n");
         }
 
-        fprintf (data, ";\n\nend;");
+        fprintf (data, ";\n\nend;\n");
         fclose(arquivo);
         fclose(data);
 
