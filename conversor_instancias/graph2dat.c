@@ -41,7 +41,7 @@ int main(int argc, char **argv)
 
             fprintf(data, "#arestas do grafo\n");
             //printf("#arestas do grafo\n");
-            fprintf(data, "param : A : I :=\n");
+            fprintf(data, "param : A : arestas_inclusas :=\n");
             //printf("param : A : I :=\n");
             printf("Lendo vizinhos dos vertices...\n");
             for(vertice = 1; vertice <= max_vertices; vertice++)
