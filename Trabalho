@@ -100,9 +100,9 @@ int main()
     while (vertices_que_faltam > 0) //Para todos os vertices
     {
         grupo_selecionado = 1 - grupo_selecionado;
-        diferenca = 0;
         for (i = 0; i < vertices.size(); i++)
         {
+            diferenca = 0;
             for (j = 0; j < vertices[i].size(); j++) //Para todos os vizinhos do vertice, faça a diferença de vertices entre A e B
             {
                 //std::cout << "Vertice e: " << vertices[i][j] << "\n";
