@@ -11,7 +11,7 @@
 int main()
 {
     FILE *arquivo;
-    char linha[256], *pch;
+    char linha[1000], *pch;
     unsigned int i, j, k, numero_vertices, numero_arestas, inteiro, vertice_aleatorio_um, vertice_aleatorio_dois;
     unsigned int vertices_que_faltam, grupo_selecionado, arestas_corte = 0;
     std::vector<std::vector<unsigned int> > vertices;
@@ -26,7 +26,8 @@ int main()
     std::vector<unsigned int>::iterator it_a_vizinhos;
     std::vector<unsigned int>::iterator it_b_vizinhos;
     int diferenca = 0, menor_de_todos;
-    unsigned int alpha = 1, aleatorio;
+    unsigned int alpha = 0.05, aleatorio;
+    int tecla;
 
     arquivo = fopen("add20.graph", "r");
 
@@ -46,31 +47,38 @@ int main()
         numero_arestas = atoi (pch); //Numero de arestas no grafo
         for (i = 0; i < numero_vertices; i++) //Para cada vertice v
         {
-            //std::cout << "\nOs vizinhos de " << i+1 << " sao: ";
+            //std:: cout << "\n";
+            //std::cin >> tecla;
+            //std::cout << "Vertice " << i+1 << " tem vizinhos: ";
             std::vector<unsigned int>temp;
             fgets(linha, sizeof(linha), arquivo);
             pch = strtok(linha, " ");
             inteiro = atoi(pch);
             temp.push_back(inteiro);
             //std::cout << inteiro << " ";
-            //Sleep(100);
+            Sleep(200);
             while (pch != NULL) //Indique os vizinhos do vertice v.
             {
                 pch = strtok(NULL, " ");
                 inteiro = atoi (pch);
-
-                //Sleep(100);
                 if (inteiro != 0)
                 {
-                    //std::cout << inteiro << " ";
                     temp.push_back(inteiro);
+                    //std::cout << inteiro << " ";
+                    //Sleep(200);
                 }
             }
             vertices.push_back(temp);
             temp.clear();
         }
     }
+    //std::cout << "Terminou de gerar o grafo.\n";
     fclose(arquivo);
+    //i = 358;
+
+    //for (j = 0; j < vertices[i].size(); j++)
+      //  std::cout << vertices[i][j] << "\n";
+    //std::cin >> inteiro;
 
     srand(time(NULL));
 
@@ -81,13 +89,8 @@ int main()
     }
     while (vertice_aleatorio_um == vertice_aleatorio_dois);   //vertices u e v devem ser distintos.
 
-    i = 0;
     A.push_back(vertice_aleatorio_um); //A <- u
     B.push_back(vertice_aleatorio_dois); //B <- v
-    //m.resize(numero_vertices);
-    vertices_escolhidos.resize(numero_vertices);
-    //m[vertice_aleatorio_um] = 0; //Valor de m para os vertices iniciais sao zero.
-    //m[vertice_aleatorio_dois] = 0; //Valor de m para os vertices iniciais sao zero.
     std::cout << "vertice aleatorio um: " << vertice_aleatorio_um << "\n";
     std::cout << "vertice aleatorio dois: " << vertice_aleatorio_dois << "\n";
     grupo_selecionado = 0;
@@ -125,32 +128,25 @@ int main()
         menor_de_todos = *std::min_element(m.begin(),m.end()); //Pega o menor valor da diferenca encontrada
         for (k = 0; k < m.size(); k++)
         {
-            //std::cout << "Forma RCL.\n";
             //Forma RCL
             if (m[k] <= menor_de_todos + (menor_de_todos * alpha) && m[k] >= menor_de_todos)
-            {
                 candidatos.push_back(k);
-            }
         }
-        /** APENAS PARA TESTE! **/
-        //std::cout << "candidatos size " << candidatos.size() << "\n";
-        //Sleep(1000);
-        candidatos.erase( std::remove( candidatos.begin(), candidatos.end(), 0 ), candidatos.end() ); //Retirar os zeros.
+
         // Remover todos os elementos que já fazem parte de A
         for (k = 0; k < A.size(); k++)
-        {
-            //std::cout << "Removendo " << A[k] << "...\n";
             candidatos.erase( std::remove( candidatos.begin(), candidatos.end(), A[k] ), candidatos.end() );
-            //Sleep(200);
-        }
+
         // Remover todos os elementos que já fazem parte de B
         for (k = 0; k < B.size(); k++)
-        {
-            //std::cout << "Removendo " << B[k] << "...\n";
             candidatos.erase( std::remove( candidatos.begin(), candidatos.end(), B[k] ), candidatos.end() );
-            //Sleep(200);
-        }
+
         srand(time(NULL));
+        if (candidatos.size() == 0)
+        {
+            //std::cout << "ZERO!\n";
+            break;
+        }
         aleatorio = rand() % candidatos.size(); //Pegar um aleatorio entre a lista de candidatos.
 
         if (grupo_selecionado == 1) //Se o subgrafo que vai receber o proximo vertice for A
@@ -159,37 +155,47 @@ int main()
             B.push_back(candidatos[aleatorio]);
 
         vertices_que_faltam--;
-        //std::cout << vertices_que_faltam << "\n";
         candidatos.clear(); //Destrói a RCL desta iteração
         m.clear(); //Destroi a lista que contém a diferença entre os subgrafos
     }
     for (i = 0; i < vertices.size(); i++)
     {
-        it_a = std::find(A.begin(), A.end(), i+1); //Procure o vertice entre o subgrafo A
-        it_b = std::find(B.begin(), B.end(), i+1); //Procure o vertice entre o subgrafo B
-        for (j = 0; j < vertices[i].size(); j++)
+        it_a = std::find(A.begin(), A.end(), i); //Procure o vertice entre o subgrafo A
+        it_b = std::find(B.begin(), B.end(), i); //Procure o vertice entre o subgrafo B
+        if (it_a != A.end()) //Se o vertice faz parte do subgrafo A
         {
-            if (it_a != A.end()) //Se o vertice faz parte do subgrafo A
+            for (j = 0; j < vertices[i].size(); j++)
             {
-                for (k = 0; k < vertices[i].size(); k++)
-                {
-                    it_a_vizinhos = std::find(A.begin(), A.end(), vertices[i][k]); //Procure os vizinhos entre o subgrafo A
-                    if (it_a_vizinhos == A.end()) //Se o vertice pertence ao subgrafo A e o vizinho nao esta em A
-                        arestas_corte++;
-                }
+                it_a_vizinhos = std::find(A.begin(), A.end(), vertices[i][j]); //Procure os vizinhos entre o subgrafo A
+                if (it_a_vizinhos == A.end()) //Se o vertice pertence ao subgrafo A e o vizinho nao esta em A
+                    arestas_corte++;
             }
-            else if (it_b != B.end()) //Se o vertice faz parte do subgrafo B
+
+        }
+        else if (it_b != B.end()) //Se o vertice faz parte do subgrafo B
+        {
+            for (j = 0; j < vertices[i].size(); j++)
             {
-                for (k = 0; k < vertices[i].size(); k++)
-                {
-                    it_b_vizinhos = std::find(B.begin(), B.end(), vertices[i][k]); //Procure os vizinhos entre o subgrafo B
-                    if (it_a_vizinhos == B.end()) //Se o vertice pertence ao subgrafo B e o vizinho nao esta em B
-                        arestas_corte++;
-                }
+                it_b_vizinhos = std::find(B.begin(), B.end(), vertices[i][j]); //Procure os vizinhos entre o subgrafo B
+                if (it_b_vizinhos == B.end()) //Se o vertice pertence ao subgrafo B e o vizinho nao esta em B
+                    arestas_corte++;
             }
         }
-
     }
     std::cout << "O numero de arestas do corte e " << arestas_corte;
+    std::cout << "\nFaltaram " << vertices_que_faltam << "vertices\n";
+    arquivo = fopen("teste.txt", "w");
+    fprintf (arquivo, "A :=\n");
+    for (i = 0; i < A.size(); i++)
+        fprintf (arquivo, "%u\n", A[i]+1);
+    for (i = 0; i < 50; i++)
+        fprintf (arquivo, "*");
+    fprintf (arquivo, "\n");
+    fprintf (arquivo, "B :=\n");
+    for (j = 0; j < B.size(); j++)
+        fprintf (arquivo, "%u\n", B[j]+1);
+
+    fclose(arquivo);
+
     return 0;
 }
