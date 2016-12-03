@@ -18,13 +18,13 @@ int main()
     std::vector<std::vector<unsigned int> > vertices_escolhidos;
     std::vector<unsigned int> A;
     std::vector<unsigned int> B;
-    std::vector<unsigned int> m;
-    std::vector<unsigned int> vertice_index;
+    std::vector<int> m;
     std::vector<unsigned int> candidatos;
-    std::vector<unsigned int> candidatos_index;
     std::vector<unsigned int>::iterator it_ja_escolhido;
     std::vector<unsigned int>::iterator it_a;
     std::vector<unsigned int>::iterator it_b;
+    std::vector<unsigned int>::iterator it_a_vizinhos;
+    std::vector<unsigned int>::iterator it_b_vizinhos;
     int diferenca = 0, menor_de_todos;
     unsigned int alpha = 1, aleatorio;
 
@@ -87,30 +87,25 @@ int main()
     A.push_back(vertice_aleatorio_um); //A <- u
     B.push_back(vertice_aleatorio_dois); //B <- v
     m.resize(numero_vertices);
-    vertice_index.resize(numero_vertices);
     m[vertice_aleatorio_um] = 0; //Valor de m para os vertices iniciais sao zero.
     m[vertice_aleatorio_dois] = 0; //Valor de m para os vertices iniciais sao zero.
-    vertice_index[vertice_aleatorio_um] = vertice_aleatorio_um;
-    vertice_index[vertice_aleatorio_dois] = vertice_aleatorio_dois;
     std::cout << "vertice aleatorio um: " << vertice_aleatorio_um << "\n";
-    std::cout << "vertice aleatorio dois: " << vertice_aleatorio_dois;
+    std::cout << "vertice aleatorio dois: " << vertice_aleatorio_dois << "\n";
     grupo_selecionado = 0;
     vertices_que_faltam = numero_vertices - 2;
 
     while (vertices_que_faltam > 0) //Para todos os vertices
     {
         grupo_selecionado = 1 - grupo_selecionado;
-        for (i = 0; i < vertices.size(); i++)
+        for (i = 0; i < vertices.size(); i++) //Calcular a diferença de vertices entre A e B
         {
             diferenca = 0;
             for (j = 0; j < vertices[i].size(); j++) //Para todos os vizinhos do vertice, faça a diferença de vertices entre A e B
             {
-                //std::cout << "Vertice e: " << vertices[i][j] << "\n";
-                //Sleep(500);
                 it_a = std::find(A.begin(), A.end(), vertices[i][j]); //Procure o vertice entre o subgrafo A
                 it_b = std::find(B.begin(), B.end(), vertices[i][j]); //Procure o vertice entre o subgrafo B
 
-                if (grupo_selecionado == 0) //Se o grupo que esta sendo selecionado for A
+                if (grupo_selecionado == 1) //Se o grupo que esta sendo selecionado for A
                 {
                     if (it_a != A.end()) //Se o vizinho esta em A
                         diferenca--;
@@ -126,36 +121,64 @@ int main()
                 }
             }
             m[i] = diferenca; //Pega o valor da diferenca entre o subgrafo complementar e o escolhido.
-            vertice_index[i] = i; //Pega o indice do vertice.
         }
-
-        //std::cout << "Chegou aqui.\n";
-
         menor_de_todos = *std::min_element(m.begin(),m.end()); //Pega o menor valor da diferenca encontrada
-        std::cout << "Menor de todos e: " << menor_de_todos << "\n";
-        Sleep(1000);
-        for (k = 0; k < m.size(); i++)
+        for (k = 0; k < m.size(); k++)
         {
             //Forma RCL
-            if (m[k] >= menor_de_todos + (menor_de_todos * alpha))
+            if (m[k] <= menor_de_todos + (menor_de_todos * alpha) && m[k] >= menor_de_todos)
             {
                 candidatos.push_back(m[k]);
-                candidatos_index.push_back(vertice_index[k]);
             }
         }
-        srand(time(NULL));
+        // Remover todos os elementos que já fazem parte de A
+        for (k = 0; k < A.size(); k++)
+            candidatos.erase( std::remove( candidatos.begin(), candidatos.end(), A[i] ), candidatos.end() );
+        // Remover todos os elementos que já fazem parte de B
+        for (k = 0; k < B.size(); k++)
+            candidatos.erase( std::remove( candidatos.begin(), candidatos.end(), B[i] ), candidatos.end() );
+
         aleatorio = rand() % candidatos.size(); //Pegar um aleatorio entre a lista de candidatos.
 
-        if (grupo_selecionado == 1)
+        if (grupo_selecionado == 1) //Se o subgrafo que vai receber o proximo vertice for A
             A.push_back(aleatorio);
-        else
+        else //Se o subgrafo que vai receber o proximo vertice for B
             B.push_back(aleatorio);
 
         vertices_que_faltam--;
-        i++;
-        std::cout << "Quantos faltam? " << vertices_que_faltam << "\n";
+        std::cout << "Vertices que faltam " << vertices_que_faltam << "\n";
+        candidatos.clear(); //Destrói a RCL desta iteração
+        //std::vector<unsigned int>().swap(candidatos);
+        //candidatos.resize(0);
     }
+    for (i = 0; i < vertices.size(); i++)
+    {
+        it_a = std::find(A.begin(), A.end(), i+1); //Procure o vertice entre o subgrafo A
+        it_b = std::find(B.begin(), B.end(), i+1); //Procure o vertice entre o subgrafo B
+        for (j = 0; j < vertices[i].size(); j++)
+        {
+            if (it_a != A.end()) //Se o vertice faz parte do subgrafo A
+            {
+                for (k = 0; k < vertices[i].size(); k++)
+                {
+                    it_a_vizinhos = std::find(A.begin(), A.end(), vertices[i][k]); //Procure os vizinhos entre o subgrafo A
+                    if (it_a_vizinhos == A.end()) //Se o vertice pertence ao subgrafo A e o vizinho nao esta em A
+                        arestas_corte++;
+                }
+            }
+            else if (it_b != B.end()) //Se o vertice faz parte do subgrafo A
+            {
+                for (k = 0; k < vertices[i].size(); k++)
+                {
+                    it_b_vizinhos = std::find(B.begin(), B.end(), vertices[i][k]); //Procure os vizinhos entre o subgrafo A
+                    if (it_a_vizinhos == B.end()) //Se o vertice pertence ao subgrafo A e o vizinho nao esta em A
+                        arestas_corte++;
+                }
+            }
+        }
 
+    }
+    std::cout << "O numero de aresta do corte e " << arestas_corte;
     return 0;
 }
 
