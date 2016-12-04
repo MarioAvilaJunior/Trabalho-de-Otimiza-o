@@ -27,7 +27,10 @@ int main()
     std::vector<unsigned int>::iterator it_b_vizinhos;
     int diferenca = 0, menor_de_todos;
     char nome_arquivo[20];
-    unsigned int alpha = 0.05, aleatorio, arestas_no_subgrafo_complementar, arestas_no_subgrafo;
+    unsigned int alpha = 0.05, aleatorio;
+    int arestas_no_subgrafo_complementar, arestas_no_subgrafo;
+    double tempo;
+    time_t t_inicio, t_fim;
     int tecla;
 
     std::cout << "Digite o nome do arquivo de entrada (.graph): ";
@@ -40,6 +43,7 @@ int main()
     //std::cin >> alpha;
     //}
 
+    t_inicio = time(NULL);
     arquivo = fopen("add20.graph", "r");
 
     if (!arquivo)
@@ -88,7 +92,7 @@ int main()
     fclose(arquivo);
 
     srand(time(NULL));
-
+    std::cout << "Gerando solucao inicial...\n";
     do
     {
         vertice_aleatorio_um = rand() % numero_vertices; //Gera um numero aleatorio entre 0 e |V|-1
@@ -192,7 +196,8 @@ int main()
     std::cout << "Solucao inicial (SI): \n";
     std::cout << "O numero de arestas do corte e " << arestas_corte;
     std::cout << "\nFaltaram " << vertices_que_faltam << "vertices\n";
-    /*arquivo = fopen("teste.txt", "w");
+
+    arquivo = fopen("teste.txt", "w");
     fprintf (arquivo, "A :=\n");
     for (i = 0; i < A.size(); i++)
         fprintf (arquivo, "%u\n", A[i]+1);
@@ -203,7 +208,7 @@ int main()
     for (j = 0; j < B.size(); j++)
         fprintf (arquivo, "%u\n", B[j]+1);
 
-    fclose(arquivo);*/
+    fclose(arquivo);
 
     //Busca local
     for (i = 0; i < vertices.size()/2; i++)
@@ -217,11 +222,11 @@ int main()
             //O vertice i selecionado tem que pertencer a B.
             for (j = 0; j < vertices[i].size(); j++)
             {
-                it_a_vizinhos = std::find(A.begin(), A.end(), vertices[i][j]); //Procure os vizinhos entre o subgrafo A
-                if (it_a_vizinhos != A.end()) //Se o vertice pertence ao subgrafo B e o vizinho esta em A
+                it_b_vizinhos = std::find(B.begin(), B.end(), vertices[i][j]); //Procure os vizinhos entre o subgrafo B
+                if (it_b_vizinhos != B.end()) //Se o vertice pertence ao subgrafo B e o vizinho esta em B
+                    arestas_no_subgrafo++;
+                else if (it_b_vizinhos == B.end()) //Se o vertice pertence ao subgrafo B e o vizinho esta em A
                     arestas_no_subgrafo_complementar++;
-                    else if (it_a_vizinhos == A.end()) //Se o vertice pertence ao subgrafo A e o vizinho esta em B
-                        arestas_no_subgrafo++;
             }
             if (arestas_no_subgrafo - arestas_no_subgrafo_complementar < 0)
             {
@@ -238,11 +243,11 @@ int main()
             //O vertice i selecionado tem que pertencer a A.
             for (j = 0; j < vertices[i].size(); j++)
             {
-                it_b_vizinhos = std::find(B.begin(), B.end(), vertices[i][j]); //Procure os vizinhos entre o subgrafo B
-                if (it_b_vizinhos != B.end()) //Se o vertice pertence ao subgrafo A e o vizinho esta em B
-                    arestas_no_subgrafo_complementar++;
-                else if (it_b_vizinhos == B.end()) //Se o vertice pertence ao subgrafo A e o vizinho esta em A
+                it_a_vizinhos = std::find(A.begin(), A.end(), vertices[i][j]); //Procure os vizinhos entre o subgrafo A
+                if (it_a_vizinhos != A.end()) //Se o vertice pertence ao subgrafo A e o vizinho esta em A
                     arestas_no_subgrafo++;
+                else if (it_a_vizinhos == A.end()) //Se o vertice pertence ao subgrafo A e o vizinho esta em B
+                    arestas_no_subgrafo_complementar++;
             }
 
             if (arestas_no_subgrafo - arestas_no_subgrafo_complementar < 0)
@@ -257,6 +262,7 @@ int main()
         }
     }
 
+    arestas_corte = 0;
     //Conta o numero de arestas do corte novamente
     for (i = 0; i < vertices.size(); i++)
     {
@@ -285,5 +291,8 @@ int main()
     arestas_corte = arestas_corte/2;
     std::cout << "Solucao final (SF): \n";
     std::cout << "O numero de arestas do corte e " << arestas_corte;
+    t_fim = time(NULL);
+    tempo = difftime(t_fim, t_inicio);
+    std::cout << "\nO programa levou " << tempo << " segundos para executar.\n";
     return 0;
 }
