@@ -19,10 +19,12 @@ void construir_solucao_inicial (std::vector<int>& solucao);
 void exibe_arestas_corte (const std::vector<int>& solucao, int inteiro);
 int busca_local (std::vector<int>& solucao, const std::vector< std::vector<int> >& vertices, int *tam_a, int *tam_b);
 void tamanho_subgrafos (const std::vector<int>& solucao, int *tam_a, int *tam_b);
-
+time_t t_inicio, t_fim;
+double tempo;
 
 int main (int argc, char **argv)
 {
+    t_inicio = time(NULL);
 
     if (argc != 2)
     {
@@ -40,8 +42,9 @@ int main (int argc, char **argv)
         tamanho_subgrafos(solucao, &tam_a, &tam_b);
         busca_local (solucao, vertices, &tam_a, &tam_b);
         exibe_arestas_corte (solucao, 1);
-        tam_a = 0; tam_b = 0;
-        tamanho_subgrafos(solucao, &tam_a, &tam_b);
+        t_fim = time(NULL);
+        tempo = difftime(t_fim, t_inicio);
+        std::cout << "\nO programa levou " << tempo << " segundos para executar.\n";
     }
 
     return 0;
